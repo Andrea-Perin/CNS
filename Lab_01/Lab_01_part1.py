@@ -12,7 +12,7 @@ Dr. Alberto Testolin, Dr. Federico Chiariotti
 
 Author: Dr. Matteo Gadaleta
 
-Lab. 01
+Lab. 01 - Part 1 - Python basics
  
 """
 
