@@ -44,6 +44,7 @@ def poly_model(x, beta):
 ### Generate 20 train points
 num_train_points = 10
 x_train = np.random.rand(num_train_points)
+print(x_train.shape)
 y_train = poly_model(x_train, beta_true)
 noise = np.random.randn(len(y_train)) * 0.2
 y_train = y_train + noise
@@ -59,7 +60,8 @@ y_test = y_test + noise
 plt.close('all')
 plt.figure(figsize=(12,8))
 x_highres = np.linspace(0,1,1000)
-plt.plot(x_highres, poly_model(x_highres, beta_true), color='b', ls='--', label='True data model')
+plt.plot(x_highres, poly_model(x_highres, beta_true), color='b', ls='--', 
+         label='True data model')
 plt.plot(x_train, y_train, color='r', ls='', marker='.', label='Train data points')
 plt.plot(x_test, y_test, color='g', ls='', marker='.', label='Test data points')
 plt.xlabel('x')
@@ -156,6 +158,7 @@ class Network():
         ### Hidden layer 1
         # Add bias term
         X = np.append(X, 1)
+        print(self.WBh1)
         # Forward pass (linear)
         H1 = np.matmul(self.WBh1, X)
         # Activation function
@@ -219,8 +222,8 @@ class Network():
 
 ### PARAMETERS
 Ni = 1 # Number of inputs
-Nh1 = # Number of hidden neurons (layer 1)
-Nh2 = # Number of hidden neurons (layer 2)
+Nh1 = 100# Number of hidden neurons (layer 1)
+Nh2 = 100# Number of hidden neurons (layer 2)
 No = 1 # Number of outputs
 
 ### Initialize network
@@ -240,7 +243,8 @@ net.plot_weights()
 # Define the x vector
 x_highres = np.linspace(0, 1, 1000)
 
-# Evaluate the output for each input (this can be done as a batch, but for now let's do 1 input at a time)
+# Evaluate the output for each input (this can be done as a batch, 
+#but for now let's do 1 input at a time)
 initial_net_output = []
 for x in x_highres:
     net_out = net.forward(x)
@@ -254,9 +258,11 @@ initial_net_output = np.array([net.forward(x) for x in x_highres])
 plt.close('all')
 plt.figure(figsize=(12,8))
 x_highres = np.linspace(0,1,1000)
-plt.plot(x_highres, poly_model(x_highres, beta_true), color='b', ls='--', label='True data model')
+plt.plot(x_highres, poly_model(x_highres, beta_true), color='b', ls='--', 
+         label='True data model')
 plt.plot(x_train, y_train, color='r', ls='', marker='.', label='Train data points')
-plt.plot(x_highres, initial_net_output, color='g', ls='--', label='Network output (random weights)')
+plt.plot(x_highres, initial_net_output, color='g', ls='--', 
+         label='Network output (random weights)')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.grid()
@@ -266,10 +272,10 @@ plt.show()
 
 #%% TRAINING
 
-num_epochs = 
-lr = 
-en_decay = 
-lr_final = 
+num_epochs = 1000
+lr = 0.2
+en_decay = True 
+lr_final = 0.01
 lr_decay = (lr_final / lr)**(1 / num_epochs)
 
 train_loss_log = []
@@ -287,7 +293,8 @@ for num_ep in range(num_epochs):
     # Log
     train_loss_log.append(avg_train_loss)
     test_loss_log.append(avg_test_loss)
-    print('Epoch %d - lr: %.5f - Train loss: %.5f - Test loss: %.5f' % (num_ep + 1, lr, avg_train_loss, avg_test_loss))
+    print('Epoch %d - lr: %.5f - Train loss: %.5f - Test loss: %.5f' 
+          % (num_ep + 1, lr, avg_train_loss, avg_test_loss))
 
 # Plot losses
 plt.close('all')
@@ -313,9 +320,11 @@ net_output = np.array([net.forward(x) for x in x_highres])
 plt.close('all')
 plt.figure(figsize=(12,8))
 x_highres = np.linspace(0,1,1000)
-plt.plot(x_highres, poly_model(x_highres, beta_true), color='b', ls='--', label='True data model')
+plt.plot(x_highres, poly_model(x_highres, beta_true), color='b', ls='--', 
+         label='True data model')
 plt.plot(x_train, y_train, color='r', ls='', marker='.', label='Train data points')
-plt.plot(x_highres, net_output, color='g', ls='--', label='Network output (trained weights)')
+plt.plot(x_highres, net_output, color='g', ls='--', 
+         label='Network output (trained weights)')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.grid()
