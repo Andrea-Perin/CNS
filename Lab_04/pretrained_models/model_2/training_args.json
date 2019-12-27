@@ -1,0 +1,11 @@
+{
+    "datasetpath": "shakespeare.txt",
+    "crop_len": 100,
+    "alphabet_len": 38,
+    "hidden_units": 512,
+    "layers_num": 3,
+    "dropout_prob": 0.3,
+    "batchsize": 52,
+    "num_epochs": 1000,
+    "out_dir": "pretrained_models/model_1000"
+}

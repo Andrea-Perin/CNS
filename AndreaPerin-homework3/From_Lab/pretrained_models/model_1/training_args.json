@@ -1,0 +1,10 @@
+{
+    "datasetpath": "shakespeare.txt",
+    "crop_len": 100,
+    "alphabet_len": 38,
+    "hidden_units": 128,
+    "layers_num": 2,
+    "dropout_prob": 0.3,
+    "batchsize": 154,
+    "num_epochs": 1000
+}

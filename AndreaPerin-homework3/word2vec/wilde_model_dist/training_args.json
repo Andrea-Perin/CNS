@@ -1,0 +1,11 @@
+{
+    "datasetpath": "wilde.txt",
+    "dictionary": "embedding.pt",
+    "sentence_len": 3,
+    "hidden_units": 512,
+    "layers_num": 2,
+    "dropout_prob": 0.3,
+    "batchsize": 1000,
+    "num_epochs": 1000,
+    "out_dir": "wilde_model"
+}
