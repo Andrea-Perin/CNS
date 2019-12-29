@@ -285,7 +285,7 @@ def train_network(model, num_epochs, train_loader, valid_loader, loss_fn, optimi
 
 
 #%% Train-test-validation split
-def train_test_vali_split(dataset, batch_size=512, test_split=8.0/60, valid_split=2.0/60, shuffle=True, random_seed=43):
+def ttv_split(dataset, batch_size=512, test_split=8.0/60, valid_split=2.0/60, shuffle=True, random_seed=43):
 	'''
 		This function performs a train-test-validation split on a given dataset. The split is performed by creating
 		three different dataloaders, from which the train, test and validation samples can be drawn.
