@@ -56,6 +56,47 @@ class Rotate(object):
 
 
 
+class GaussNoise(object):
+    """Add Gaussian noise with given mean and variance to the images."""
+    
+    def __init__(self, mean=0., std=1.):
+        self.std = std
+        self.mean = mean
+    
+    def __call__(self, sample):
+        noise = self.mean+self.std()*torch.randn(sample.size())
+        return sample+noise
+
+
+
+class Occlude(object):
+    """Add random occlusions to the images. Based on the paper at
+    https://arxiv.org/pdf/1708.04896v1.pdf"""
+
+    def __init__(self, p=0.5, s_min=0.02, s_max=0.04, r_min=0.3):
+        self.p = p  # erasing probability
+        self.s_min = s_min # lower bound for area ratio of occlusion rectangle
+        self.s_max = s_max # upper bound for area ratio of occlusion rectangle
+        self.r_min = r_min # lower bound for aspect ratio of occlusion rectangle
+        self.r_max = 1./r_min # upper bound for aspect ratio of occlusion rectangle
+
+    def __call__(self, tensor):
+        if np.random.uniform() > self.p:
+            return tensor # unmodified return
+        else:
+            # area of the rectangle
+            Se = np.random.uniform(self.s_min,self.s_max) * tensor.nelement() 
+            # aspect ratio of the rectangle
+            re = np.random.uniform(self.r_min, self.r_max)
+            # dimensions of the rectangle
+            He, We = np.sqrt(Se * re), np.sqrt(Se/re)
+            # width and height of image
+            W, H = tensor.shape[1], tensor.shape[0]
+            # location of the rectangle. It must be correct
+            xe, ye = int(np.random.uniform(0,W-We)), int(np.random.uniform(0,H-He))
+            # filling with random value
+            tensor[ ye:ye + int(He), xe:xe + int(We)].fill_(np.random.uniform())
+            return tensor
 
 
 #%% Early-stopping utility
@@ -289,7 +330,7 @@ def train_network(model, num_epochs, train_loader, valid_loader, loss_fn,
 
 #%% Train-test-validation split
 def ttv_split(dataset, batch_size=512, test_split=8.0/60, valid_split=2.0/60, 
-              shuffle=True, random_seed=43):
+              shuffle=True, random_seed=43, reuse=False):
     '''
         This function performs a train-test-validation split on a given 
         dataset. The split is performed by creating three different dataloaders,
@@ -301,6 +342,7 @@ def ttv_split(dataset, batch_size=512, test_split=8.0/60, valid_split=2.0/60,
         - valid_split:    the fraction of the dataset to be used as validation
         - shuffle:      a bool value, whether to shuffle the dataset before splitting it
         - random_seed:    the random seed to use for shuffling
+        - reuse:          whether to return the subsamplers (so to reuse the splits later)
     '''    
     ### preliminary information
     dataset_size = len(dataset)
@@ -338,6 +380,8 @@ def ttv_split(dataset, batch_size=512, test_split=8.0/60, valid_split=2.0/60,
                                            batch_size=batch_size,
                                            sampler=valid_sampler,
                                            pin_memory=True)
+    if reuse:
+        return train_loader,test_loader,valid_loader,train_sampler,test_sampler,valid_sampler
     return train_loader, test_loader, valid_loader
 
 
