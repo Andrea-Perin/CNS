@@ -234,7 +234,7 @@ def val_epoch(net, dataloader, loss_fn, optimizer, device):
 
 
 def train_network(model, num_epochs, train_loader, valid_loader, loss_fn, 
-                  optimizer, patience=5):
+                  optimizer, device, patience=5):
     '''
         This function trains a model, using a validation set in addition
         to a training set. Returns a trained model, together with the logs 
@@ -246,6 +246,7 @@ def train_network(model, num_epochs, train_loader, valid_loader, loss_fn,
         - valid_loader: the DataLoader for the validation set
         - loss_fn:        the loss function to use for the training
         - optimizer:    the optimizer to use for the training
+        - device:       the device to use
         - patience:     the patience parameter for the EarlyStopping
     '''
     # earlystopping class
@@ -259,12 +260,14 @@ def train_network(model, num_epochs, train_loader, valid_loader, loss_fn,
         train_loss.append(train_epoch(model, 
                                       train_loader, 
                                       loss_fn, 
-                                      optimizer))
+                                      optimizer,
+                                      device))
         # validation step
         valid_loss.append(val_epoch(model,
                                     valid_loader,
                                     loss_fn,
-                                    optimizer))
+                                    optimizer,
+                                    device))
         # print info on batch losses
         epoch_len = len(str(num_epochs))
         batch_info = (f'[{epoch:>{epoch_len}}/{num_epochs:>{epoch_len}}] ' +
