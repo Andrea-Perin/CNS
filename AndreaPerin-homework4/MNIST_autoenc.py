@@ -179,6 +179,15 @@ class Autoencoder(nn.Module):
 
 ### Training function
 def train_epoch(net, dataloader, loss_fn, optimizer):
+	'''
+		This function trains a model on a training set.
+		Returns the average loss during an epoch on the training set.
+		PARAMETERS:
+		- net: 			a Pytorch network
+		- dataloader:	a Pytorch DataLoader for the training set
+		- loss_fn:		the loss function to be used for the computation
+		- optimizer: 	the optimizer to use
+	'''
     # Training
     net.train()
     avg_train_loss = []
@@ -198,6 +207,15 @@ def train_epoch(net, dataloader, loss_fn, optimizer):
 
 ### Validation function
 def val_epoch(net, dataloader, loss_fn, optimizer):
+	'''
+		This function evaluates the performance of a model on a validation set.
+		Returns the loss on the validation set.
+		PARAMETERS:
+		- net: 			a Pytorch network
+		- dataloader:	a Pytorch DataLoader for the validation set
+		- loss_fn:		the loss function to be used for the computation
+		- optimizer: 	the optimizer to use(?)
+	'''
     # Validation
     net.eval() # Evaluation mode (e.g. disable dropout)
     with torch.no_grad(): # No need to track the gradients
@@ -216,8 +234,20 @@ def val_epoch(net, dataloader, loss_fn, optimizer):
     return val_loss.data
 
 
-def train_network(model, num_epochs, train_loader, valid_loader,
-                  loss_fn, optimizer, patience=5):
+def train_network(model, num_epochs, train_loader, valid_loader, loss_fn, optimizer, patience=5):
+	'''
+		This function trains a model, using a validation set in addition
+		to a training set. Returns a trained model, together with the logs 
+		of the training loss and the validation loss.
+		PARAMETERS:
+		- model: 		the Pytorch network to train
+		- num_epochs:	the maximum number of epochs for which to train the model 
+		- train_loader: the DataLoader for the training set
+		- valid_loader: the DataLoader for the validation set
+		- loss_fn:		the loss function to use for the training
+		- optimizer:	the optimizer to use for the training
+		- patience: 	the patience parameter for the EarlyStopping
+	'''
     # earlystopping class
     early_stopping = EarlyStopping(patience=patience)
     # logs for losses
@@ -253,5 +283,56 @@ def train_network(model, num_epochs, train_loader, valid_loader,
 
 
 
+
+#%% Train-test-validation split
+def train_test_vali_split(dataset, batch_size=512, test_split=8.0/60, valid_split=2.0/60, shuffle=True, random_seed=43):
+	'''
+		This function performs a train-test-validation split on a given dataset. The split is performed by creating
+		three different dataloaders, from which the train, test and validation samples can be drawn.
+		PARAMETERS:
+		- dataset: 		a Pytorch Dataset object
+		- batch_size: 	the number of samples per batch for each of the loaders
+		- test_split:	the fraction of the dataset to be used as test
+		- valid_split:	the fraction of the dataset to be used as validation
+		- shuffle:      a bool value, whether to shuffle the dataset before splitting it
+		- random_seed:	the random seed to use for shuffling
+	'''    
+	### preliminary information
+	dataset_size = len(dataset)
+	batch_size = batch_size
+	test_split = test_split
+	valid_split = valid_split
+	shuffle_dataset = shuffle
+	random_seed= random_seed
+
+	# Creating data indices for training and test splits:
+	indices = list(range(dataset_size))
+	split_test = int(np.floor( test_split * dataset_size))
+	split_valid = int(np.floor( valid_split * dataset_size))
+	if shuffle_dataset :
+		np.random.seed(random_seed)
+		np.random.shuffle(indices)
+	train_indices = indices[split_test+split_valid:]
+	test_indices = indices[split_valid:split_test+split_valid]
+	valid_indices = indices[:split_valid]
+
+	# Creating pytorch data samplers and loaders:
+	train_sampler = SubsetRandomSampler(train_indices)
+	test_sampler = SubsetRandomSampler(test_indices)
+	valid_sampler = SubsetRandomSampler(valid_indices)
+
+	train_loader = torch.utils.data.DataLoader(dataset, 
+			                               batch_size=batch_size, 
+			                               sampler=train_sampler,
+			                               pin_memory=True)
+	test_loader = torch.utils.data.DataLoader(dataset, 
+			                              batch_size=batch_size,
+			                              sampler=test_sampler,
+			                              pin_memory=True)
+	valid_loader = torch.utils.data.DataLoader(dataset, 
+			                               batch_size=batch_size,
+			                               sampler=valid_sampler,
+			                               pin_memory=True)
+	return train_loader, test_loader, valid_loader
 
 
