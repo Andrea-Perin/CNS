@@ -64,7 +64,7 @@ class GaussNoise(object):
         self.mean = mean
     
     def __call__(self, sample):
-        noise = self.mean+self.std()*torch.randn(sample.size())
+        noise = self.mean+self.std*torch.randn(sample.size())
         return sample+noise
 
 
