@@ -100,7 +100,6 @@ best_net.load_state_dict(torch.load('lab_stuff/net_params_'+str(best_net_idx)+'.
 test_performance = autoenc.val_epoch(net=best_net,
                                       dataloader=test_loader,
                                       loss_fn=loss_fn,
-                                      optimizer=optim,
                                       device=device)
 ### create noisy dataset and evaluate
 noise_transform = transforms.Compose([autoenc.Rotate(),
@@ -116,7 +115,6 @@ noise_loader = torch.utils.data.DataLoader(noisy_dataset,
 noise_performance = autoenc.val_epoch(net=best_net,
                                       dataloader=noise_loader,
                                       loss_fn=loss_fn,
-                                      optimizer=optim,
                                       device=device)
 ### create occluded dataset and evaluate
 corrupted_transform = transforms.Compose([autoenc.Rotate(),
@@ -134,14 +132,22 @@ corrupt_loader = torch.utils.data.DataLoader(corrupted_dataset,
 corrupt_performance = autoenc.val_epoch(net=best_net,
                                         dataloader=corrupt_loader,
                                         loss_fn=loss_fn,
-                                        optimizer=optim,
                                         device=device)
 ### Print performances on screen
 print("The performance on standard test samples is: ",test_performance)
 print("The performance on noisy samples is: ",noise_performance)
 print("The performance on occluded samples is: ",corrupt_performance)
 
+#%% Sampling from the best network
+### trying with a random point near the cluster of the "4" digit
+chosen_digit = 4
+centroid = torch.empty()
+for sample,lab in train_loader:
+    centroid = torch.cat(best_net.encode(sample[lab==chosen_digit]))
 
+centroid
+
+#enc_space_point = torch.randn(best_net_idx)
 
 
 

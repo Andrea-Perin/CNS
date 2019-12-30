@@ -248,7 +248,7 @@ def train_epoch(net, dataloader, loss_fn, optimizer, device):
 
 
 ### Validation function
-def val_epoch(net, dataloader, loss_fn, optimizer, device):
+def val_epoch(net, dataloader, loss_fn, device):
     '''
     This function evaluates the performance of a model on a validation set.
     Returns the loss on the validation set.
@@ -256,7 +256,6 @@ def val_epoch(net, dataloader, loss_fn, optimizer, device):
     - net:         a Pytorch network
     - dataloader:  a Pytorch DataLoader for the validation set
     - loss_fn:     the loss function to be used for the computation
-    - optimizer:   the optimizer to use
     - device:      the device to be used
     '''
     net.eval()
