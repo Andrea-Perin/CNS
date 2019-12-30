@@ -2,6 +2,7 @@ from collections import deque
 
 import scipy.io as sio
 import numpy as np
+import matplotlib.pyplot as plt
 
 import torch
 from torch import nn
@@ -158,6 +159,7 @@ class Autoencoder(nn.Module):
 
     def __init__(self, encoded_space_dim):
         super().__init__()
+        self.enc_dim = encoded_space_dim
         
         ### Encoder
         self.encoder_cnn = nn.Sequential(
@@ -385,3 +387,45 @@ def ttv_split(dataset, batch_size=512, test_split=8.0/60, valid_split=2.0/60,
     return train_loader, test_loader, valid_loader
 
 
+#%% Find centroid of cluster in encoding space
+def find_centroid(chosen_digit, model, dataloader, device):
+    '''
+    Returns the centroid of a given digit representation in the encoding space.
+    PARAMETERS:
+        - chosen_digit:     the digit of which to find the centroid. Only images
+                            where label==chosen_digit will be considered.
+        - model:            the autoencoder that generates the encodings.
+        - dataloader:       the dataloader that yields the images to encode.
+        - device:           the device where the network and the data reside
+    '''
+    centroids = []
+    encodings = []
+    for sample,lab in dataloader:
+        sample=sample[lab==chosen_digit]
+        encodings.append(model.encode(sample.to(device)))
+    for enc in encodings:
+        for single_enc in enc:
+            centroids.append(single_enc)
+    centroids = torch.stack(centroids)
+    with torch.no_grad():
+        centroid = torch.mean(centroids, axis=0)
+        return centroid
+    
+#%% Sample around a centroid (for autoencoder, not VAE!)
+def sample_around(centroid, model, mean=0.0, var=1.0, show=True):
+    '''
+    Returns a sample drawn around the centroid.
+    PARAMETERS:
+        - centroid:     the centroid in the encoding space, around which to sample
+                        according to a multivariate normal distribution.
+        - model:        the autoencoder that generates the encodings.
+        - mean:         the mean of the gaussian.
+        - var:          the variance of the gaussian.
+        - show:         whether to plot the sample.
+    '''
+    noise = mean+var*torch.randn(model.enc_dim)
+    if show:
+        plt.imshow(model.decode(noise).cpu().detach().numpy().squeeze())
+        return model.decode(centroid+noise)
+    return model.decode(centroid+noise)
+    

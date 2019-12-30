@@ -25,7 +25,8 @@ if torch.cuda.is_available():
 else:
     device = torch.device('cpu')
     print('No GPU for you!')
-    
+print()
+
 #%% Creating test-train-validation split
 ### filename
 matfile = '../datasets/MNIST.mat'
@@ -90,11 +91,17 @@ ax.set_ylabel("Loss", fontsize=20)
 ax.legend()
 plt.savefig('performance.pdf')
 
-#%% Performance on modified datasets
+#%% Performance on various datasets
 ### Take the best model
 best_net_idx = enc_space_dims[np.argmin(performance)]
 best_net = autoenc.Autoencoder(encoded_space_dim=best_net_idx)
-best_net.load_state_dict(torch.load('net_params_'+str(best_net_idx)+'.pth'))
+best_net.load_state_dict(torch.load('lab_stuff/net_params_'+str(best_net_idx)+'.pth'))
+### On standard test dataset
+test_performance = autoenc.val_epoch(net=best_net,
+                                      dataloader=test_loader,
+                                      loss_fn=loss_fn,
+                                      optimizer=optim,
+                                      device=device)
 ### create noisy dataset and evaluate
 noise_transform = transforms.Compose([autoenc.Rotate(),
                                             transforms.ToTensor(),
@@ -106,7 +113,7 @@ noise_loader = torch.utils.data.DataLoader(noisy_dataset,
                                            batch_size=512,
                                            sampler=test_samp,
                                            pin_memory=True)
-noise_performance = autoenc.val_epoch(net=net,
+noise_performance = autoenc.val_epoch(net=best_net,
                                       dataloader=noise_loader,
                                       loss_fn=loss_fn,
                                       optimizer=optim,
@@ -124,12 +131,13 @@ corrupt_loader = torch.utils.data.DataLoader(corrupted_dataset,
                                              batch_size=512,
                                              sampler=test_samp,
                                              pin_memory=True)
-corrupt_performance = autoenc.val_epoch(net=net,
+corrupt_performance = autoenc.val_epoch(net=best_net,
                                         dataloader=corrupt_loader,
                                         loss_fn=loss_fn,
                                         optimizer=optim,
                                         device=device)
 ### Print performances on screen
+print("The performance on standard test samples is: ",test_performance)
 print("The performance on noisy samples is: ",noise_performance)
 print("The performance on occluded samples is: ",corrupt_performance)
 
