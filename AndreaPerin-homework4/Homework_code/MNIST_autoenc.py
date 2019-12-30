@@ -410,8 +410,9 @@ def find_centroid(chosen_digit, model, dataloader, device):
         centroid = torch.mean(centroids, axis=0)
         return centroid
     
-#%% Sample around a centroid (for autoencoder, not VAE!)
-def sample_around(centroid, model, mean=0.0, var=1.0, show=True):
+    
+ #%% Sample around a centroid (for autoencoder, not VAE!)
+def sample_around(centroid, model, mean=0.0, var=1.0):
     '''
     Returns a sample drawn around the centroid.
     PARAMETERS:
@@ -420,11 +421,8 @@ def sample_around(centroid, model, mean=0.0, var=1.0, show=True):
         - model:        the autoencoder that generates the encodings.
         - mean:         the mean of the gaussian.
         - var:          the variance of the gaussian.
-        - show:         whether to plot the sample.
     '''
-    noise = mean+var*torch.randn(model.enc_dim)
-    if show:
-        plt.imshow(model.decode(noise).cpu().detach().numpy().squeeze())
-        return model.decode(centroid+noise)
-    return model.decode(centroid+noise)
+    device = centroid.device
+    centroid = centroid + mean + var*torch.randn(model.enc_dim).to(device)
+    return model.decode(centroid)
     
